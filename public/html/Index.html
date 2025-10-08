@@ -1,0 +1,42 @@
+<!doctype html>
+<!--
+ @license
+ Copyright 2019 Google LLC. All Rights Reserved.
+ SPDX-License-Identifier: Apache-2.0
+-->
+<html>
+
+<head>
+  <title>Simple Map</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="script.js"></script>
+</head>
+
+<body>
+  <div class="menu-sidebar">
+    <button class="menu-button" id="menu-button">☰</button>
+  </div>
+  <div class="menu" id="menu">
+    <input type="text" class="routes-input" placeholder="Ponto de partida" id="origin">
+    <input type="text" class="routes-input" placeholder="Ponto de chegada" id="destination">
+    <input type="submit" class="submit-input" value="Procurar" id="submit">
+  </div>
+  <div id="map"></div>
+
+  <script>
+    const button = document.getElementById('menu-button');
+    const menu = document.getElementById('menu');
+    const submit = document.getElementById('submit');
+
+    button.addEventListener("click", function () {
+      menu.classList.toggle("open");
+    });
+
+    submit.addEventListener("click", function () {
+      event.preventDefault();
+      generateRoute();
+    })
+  </script>
+</body>
+
+</html>
