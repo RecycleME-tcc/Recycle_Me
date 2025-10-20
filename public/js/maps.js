@@ -4,6 +4,13 @@ let map;
 let directionsService;
 let directionsRenderer;
 
+// Variaveis dos elementos
+let originInput;
+let destinationInput;
+let historyList;
+let submitButton;
+let currentLocationButton;
+
 //Exibição do Histórico
 const displayHistory = () => {
     const historyList = document.getElementById("history-list");
@@ -26,7 +33,7 @@ const saveRouteToHistory = (origin, destination) => {
         route.origin === origin && route.destination === destination
     );
 
-    if(existingIndex > -1){
+    if (existingIndex > -1) {
         routes.splice(existingIndex, 1);
     }
 
@@ -36,15 +43,63 @@ const saveRouteToHistory = (origin, destination) => {
 
     localStorage.setItem('routeHistory', JSON.stringify(routes));
 }
+//Verifica se o navegador do usuário suporta a geolocalização
+const findUserLocation = () => {
+    if (!navigator.geolocation) {
+        alert("A geolocalização não está disponível no seu navegador")
+        return
+    }
+
+    navigator.geolocation.getCurrentPosition((position) => {
+
+        //Caso o navegador suporte, a localização é encontrada
+        const userCords = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+        }
+
+        //Geocodificação Reversa (coordenadas para localização)
+        const geocoder = new google.maps.Geocoder();
+        geocoder.geocode({ location: userCords }, (results, status) => {
+            if (status === "OK") {
+                if (results[0]) {
+                    //Se o endereço for encontrado, atualiza o campo de partida
+                    originInput.value = results[0].formatted_address;
+                } else {
+                    alert("Nenhum resultado obtido para as coordenadas")
+                }
+            } else {
+                console.log("Geocoder falhou devido a: " + status);
+            }
+        });
+    },
+    (error) => {
+            //Caso o usuário negar a permissão, ou houver uma falha
+            let errorMessage = "Ocorreu um erro desconhecido ao buscar a localização";
+            switch(error.code){
+                case error.PERMISSION.DENIED:
+                    errorMessage = "Você negou a permissão de Geolocalização";
+                    break;
+                case error.POSITION.UNAVAILABLE:
+                    errorMessage = "As informações de localização não estão disponíveis";
+                    break;
+                case error.TIMEOUT:
+                    errorMessage = "O pedido para obter a localização expirou";
+                    break;
+            }
+            alert(errorMessage)
+        }
+)
+}
 
 // Função que carrega o script do Google Maps dinamicamente
- const loadGoogleMaps = async() => {
+const loadGoogleMaps = async () => {
     try {
         // 1. Busca a chave da API no nosso backend
-        const response = await fetch('/api/key');     
+        const response = await fetch('/api/key');
         const data = await response.json();
         const apiKey = data.apiKey;
-        
+
 
         // 2. Cria a tag <script> e a adiciona à página
         const script = document.createElement('script');
@@ -59,7 +114,7 @@ const saveRouteToHistory = (origin, destination) => {
 }
 
 // Esta função será chamada automaticamente pelo script do Google Maps após o carregamento
-window.initMap = async function() {
+window.initMap = async function () {
     const { Map } = await google.maps.importLibrary("maps");
 
     map = new Map(document.getElementById("map"), {
@@ -75,7 +130,7 @@ window.initMap = async function() {
 }
 
 // Função para gerar a rota
- const generateRoute = (origin, destination) => {
+const generateRoute = (origin, destination) => {
     const request = {
         origin: origin,
         destination: destination,
@@ -98,31 +153,34 @@ window.initMap = async function() {
 loadGoogleMaps();
 
 document.addEventListener('DOMContentLoaded', () => {
-    const submitButton = document.getElementById('submit');
-    const originInput = document.getElementById('origin');
-    const destinationInput = document.getElementById('destination');
-    const historyList = document.getElementById('history-list');
+    originInput = document.getElementById('origin');
+    currentLocationButton = document.getElementById('current-location-btn');
+    destinationInput = document.getElementById('destination');
+    submitButton = document.getElementById('submit');
+    historyList = document.getElementById('history-list');
 
-    submitButton.addEventListener('click', (event) =>{
+    currentLocationButton.addEventListener('click', findUserLocation);
+
+    submitButton.addEventListener('click', (event) => {
         event.preventDefault();
         const origin = originInput.value;
         const destination = destinationInput.value;
-        if(origin && destination){
+        if (origin && destination) {
             generateRoute(origin, destination);
         } else {
             alert('Por favor, preencha o ponto de partida e chegada');
         }
     })
 
-    historyList.addEventListener('click', (event) =>{
-    if(event.target && event.target.nodeName === 'LI') {
-        const clickedItem = event.target;
-        const origin = clickedItem.dataset.origin;
-        const destination = clickedItem.dataset.destination;
+    historyList.addEventListener('click', (event) => {
+        if (event.target && event.target.nodeName === 'LI') {
+            const clickedItem = event.target;
+            const origin = clickedItem.dataset.origin;
+            const destination = clickedItem.dataset.destination;
 
-        originInput.value = origin;
+            originInput.value = origin;
             destinationInput.value = destination;
             generateRoute(origin, destination);
-    }
-})
+        }
+    })
 })
