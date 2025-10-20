@@ -1,0 +1,76 @@
+/**
+    * @license
+    * Copyright 2019 Google LLC. All Rights Reserved.
+    * SPDX-License-Identifier: Apache-2.0
+    */
+/*
+    * Always set the map height explicitly to define the size of the div element
+    * that contains the map.
+    */
+
+@import url('https://fonts.googleapis.com/css2?family=Tirra:wght@400;500;600;700;800;900&display=swap');
+
+#map {
+  height: 95%;
+  width: 95%;
+  float: right;
+  border: 1px solid black;
+  z-index: 1;
+}
+
+/*
+    * Optional: Makes the sample page fill the window.
+    */
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.menu-button {
+  position: absolute;
+  border: 2px solid blue;
+  left: 25%;
+  top: 5%;
+  cursor: pointer;
+}
+
+.menu-sidebar {
+  position: absolute;
+  width: 5%;
+  height: 95%;
+  border: 1px solid black;
+  background-color: black;
+  z-index: 3;
+}
+
+.menu {
+  position: absolute;
+  background-color: lightgreen;
+  width: 20%;
+  height: 95%;
+  left: 5.1%;
+  top: 0;
+  transform: translateX(-100%);
+  transition: transform 0.3s ease;
+  z-index: 2;
+}
+
+.menu.open {
+  transform: translateX(0);
+}
+
+#history-list li {
+  background-color: #f0f0f0;
+  padding: 8px;
+  border-radius: 4px;
+  margin-bottom: 5px;
+  font-size: 0.8em;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+#history-list li:hover {
+  background-color: #dcdcdc;
+}
