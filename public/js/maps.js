@@ -10,6 +10,7 @@ let destinationInput;
 let historyList;
 let submitButton;
 let currentLocationButton;
+let currentMapButton;
 
 //Exibição do Histórico
 const displayHistory = () => {
@@ -73,14 +74,14 @@ const findUserLocation = () => {
             }
         });
     },
-    (error) => {
+        (error) => {
             //Caso o usuário negar a permissão, ou houver uma falha
             let errorMessage = "Ocorreu um erro desconhecido ao buscar a localização";
-            switch(error.code){
-                case error.PERMISSION.DENIED:
+            switch (error.code) {
+                case error.PERMISSION_DENIED:
                     errorMessage = "Você negou a permissão de Geolocalização";
                     break;
-                case error.POSITION.UNAVAILABLE:
+                case error.POSITION_UNAVAILABLE:
                     errorMessage = "As informações de localização não estão disponíveis";
                     break;
                 case error.TIMEOUT:
@@ -89,7 +90,7 @@ const findUserLocation = () => {
             }
             alert(errorMessage)
         }
-)
+    )
 }
 
 // Função que carrega o script do Google Maps dinamicamente
@@ -152,14 +153,63 @@ const generateRoute = (origin, destination) => {
 // Inicia o processo de carregamento
 loadGoogleMaps();
 
+const centerMapOnUser = () => {
+    if (!navigator.geolocation) {
+        alert("A geolocalização não está disponível no seu navegador")
+        return
+    }
+
+    navigator.geolocation.getCurrentPosition((position) => {
+
+        //Posição do usuário
+        const userCords = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+        }
+        map.setCenter(userCords);
+        map.setZoom(15);
+
+        new google.maps.Marker({
+            position: userCords,
+            map: map,
+            title: "Sua localização atual",
+            icon: {
+                url: "/images/user-pin.png",
+                scaledSize: new google.maps.Size(40, 40) // Tamnaho de 40 pixels para o marcador
+
+            }
+        })
+    },
+        (error) => {
+            //Caso o usuário negar a permissão, ou houver uma falha
+            let errorMessage = "Ocorreu um erro desconhecido ao buscar a localização";
+            switch (error.code) {
+                case error.PERMISSION_DENIED:
+                    errorMessage = "Você negou a permissão de Geolocalização";
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    errorMessage = "As informações de localização não estão disponíveis";
+                    break;
+                case error.TIMEOUT:
+                    errorMessage = "O pedido para obter a localização expirou";
+                    break;
+            }
+            alert(errorMessage)
+        }
+    )
+}
+
+
 document.addEventListener('DOMContentLoaded', () => {
     originInput = document.getElementById('origin');
     currentLocationButton = document.getElementById('current-location-btn');
     destinationInput = document.getElementById('destination');
     submitButton = document.getElementById('submit');
     historyList = document.getElementById('history-list');
+    currentMapButton = document.getElementById('current-map-button')
 
     currentLocationButton.addEventListener('click', findUserLocation);
+    currentMapButton.addEventListener('click', centerMapOnUser);
 
     submitButton.addEventListener('click', (event) => {
         event.preventDefault();
