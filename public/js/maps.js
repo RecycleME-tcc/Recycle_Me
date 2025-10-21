@@ -117,6 +117,7 @@ const loadGoogleMaps = async () => {
 // Esta função será chamada automaticamente pelo script do Google Maps após o carregamento
 window.initMap = async function () {
     const { Map } = await google.maps.importLibrary("maps");
+    const { Autocomplete } = await google.maps.importLibrary("places");
 
     map = new Map(document.getElementById("map"), {
         center: { lat: -23.586550, lng: -46.681533 }, // Centro de Santana de Parnaíba
@@ -126,6 +127,17 @@ window.initMap = async function () {
     directionsService = new google.maps.DirectionsService();
     directionsRenderer = new google.maps.DirectionsRenderer();
     directionsRenderer.setMap(map);
+
+     originInput = document.getElementById('origin');
+     destinationInput = document.getElementById('destination');
+
+    const autocompleteOptions = {
+        componentRestrictions: { 'country': 'br' }
+    }
+
+    const originAutocomplete = new Autocomplete(originInput, autocompleteOptions);
+    const destinationAutocomplete = new Autocomplete(destinationInput, autocompleteOptions);
+
 
     displayHistory();
 }
@@ -201,9 +213,7 @@ const centerMapOnUser = () => {
 
 
 document.addEventListener('DOMContentLoaded', () => {
-    originInput = document.getElementById('origin');
     currentLocationButton = document.getElementById('current-location-btn');
-    destinationInput = document.getElementById('destination');
     submitButton = document.getElementById('submit');
     historyList = document.getElementById('history-list');
     currentMapButton = document.getElementById('current-map-button')
