@@ -128,8 +128,8 @@ window.initMap = async function () {
     directionsRenderer = new google.maps.DirectionsRenderer();
     directionsRenderer.setMap(map);
 
-     originInput = document.getElementById('origin');
-     destinationInput = document.getElementById('destination');
+    originInput = document.getElementById('origin');
+    destinationInput = document.getElementById('destination');
 
     const autocompleteOptions = {
         componentRestrictions: { 'country': 'br' }
@@ -144,16 +144,26 @@ window.initMap = async function () {
 
 // Função para gerar a rota
 const generateRoute = (origin, destination) => {
+    const selectedMode = document.querySelector('input[name="travelMode"]:checked').value;
+
     const request = {
         origin: origin,
         destination: destination,
-        travelMode: google.maps.TravelMode.DRIVING,
+        travelMode: selectedMode,
         unitSystem: google.maps.UnitSystem.METRIC,
     };
 
     directionsService.route(request, (response, status) => {
+        const detailsDiv = document.getElementById('route-details');
+
         if (status === "OK") {
             directionsRenderer.setDirections(response);
+
+            const route = response.routes[0].legs[0];
+            const distance = route.distance.text;
+            const duration = route.duration.text;
+            detailsDiv.innerHTML = `<strong>Distância:</strong> ${distance}<br><strong>Duração:</strong> ${duration}`;
+
             saveRouteToHistory(origin, destination)
             displayHistory();
         } else {
@@ -242,5 +252,18 @@ document.addEventListener('DOMContentLoaded', () => {
             destinationInput.value = destination;
             generateRoute(origin, destination);
         }
+    })
+
+    const travelModeButtons = document.querySelectorAll('input[name="travelMode"]');
+
+    travelModeButtons.forEach(button =>{
+        button.addEventListener('change', () =>{
+            const origin = originInput.value;
+            const destination = destinationInput.value;
+
+            if(origin && destination){
+                generateRoute(origin, destination)
+            }
+        })
     })
 })
